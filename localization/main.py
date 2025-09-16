@@ -1,6 +1,8 @@
 import pandas as pd
 import sklearn as skl
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 pd.set_option('display.precision', 15)
 
@@ -19,35 +21,45 @@ X1_scaled=X1_scaler.fit_transform(X1)
 X2_scaler=skl.preprocessing.StandardScaler()
 X2_scaled=X2_scaler.fit_transform(X2)
 
-print("Data scaled")
+print("Data scaled\n")
 
 kmeans = skl.cluster.KMeans(n_clusters=5, random_state=40, n_init='auto')
 kmeans.fit(X1_scaled)
 no_outliers['cluster_label'] = kmeans.labels_
 centroids1 = X1_scaler.inverse_transform(kmeans.cluster_centers_)
+print("No Outliers Centroids:")
 print("\n".join(str(x) for x in sorted(centroids1.tolist())))
+print()
 
 
-kmeans = skl.cluster.KMeans(n_clusters=5, random_state=40, n_init='auto')
-kmeans.fit(X2_scaled)
-with_outliers['cluster_label'] = kmeans.labels_
-centroids2 = X2_scaler.inverse_transform(kmeans.cluster_centers_)
+dbscan = skl.cluster.DBSCAN(eps=0.2, min_samples=5)
+dbscan.fit(X2_scaled)
+with_outliers['cluster_label'] = dbscan.labels_
+
+centroids2_df = with_outliers[with_outliers['cluster_label'] != -1].groupby('cluster_label')[['x','y']].mean()
+if centroids2_df.empty:
+    centroids2 = np.empty((0,2))
+else:
+    centroids2 = centroids2_df.sort_index().values
+
+print("With Outliers Centroids:")
 print("\n".join(str(x) for x in sorted(centroids2.tolist())))
+print()
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-ax1.scatter(no_outliers['x'], no_outliers['y'], c=no_outliers['cluster_label'], cmap='viridis', s=100)
+ax1.scatter(no_outliers['x'], no_outliers['y'], c=no_outliers['cluster_label'], cmap='viridis', s=20)
 ax1.scatter(centroids1[:, 0],
             centroids1[:, 1],
-            marker='X', s=200, color='red', label='Centroids')
-ax2.scatter(with_outliers['x'], with_outliers['y'], c=with_outliers['cluster_label'], cmap='viridis', s=100)
+            marker='X', s=100, color='red', label='Centroids')
+ax2.scatter(with_outliers['x'], with_outliers['y'], c=with_outliers['cluster_label'], cmap='viridis', s=20)
 ax2.scatter(centroids2[:, 0],
             centroids2[:, 1],
-            marker='X', s=200, color='red', label='Centroids')
-ax1.set_title('With Outliers')
+            marker='X', s=100, color='red', label='Centroids')
+ax1.set_title('No Outliers')
 ax1.set_xlabel('X')
 ax1.set_ylabel('Y')
 ax1.legend()
-ax2.set_title('No Outliers')
+ax2.set_title('With Outliers')
 ax2.set_xlabel('X')
 ax2.set_ylabel('Y')
 ax2.legend()
