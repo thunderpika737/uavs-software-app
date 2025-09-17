@@ -6,7 +6,7 @@ import random
 # generate labels in vision/labels/train and vision/labels/val
 
 backgrounds = ['dirt.jpg', 'grass.jpg', 'runway.jpg']
-objects = ['bike.png', 'frisbee.png', 'golfball.png', 'suitcase.png', 'traffic_cone.png']
+objects = ['bike.png', 'frisbee.png', 'golfball.png', 'suitcase.png', 'traffic_cone.png', 'disccone.png']
 
 def generate_image():
     bg = Image.open('vision/generator/backgrounds/' + random.choice(backgrounds))
