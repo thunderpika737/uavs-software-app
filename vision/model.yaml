@@ -1,0 +1,7 @@
+path: ./vision
+train: ./vision/images/train
+val: ./vision/images/val
+
+names:
+  0: odlc
+  1: odlc
